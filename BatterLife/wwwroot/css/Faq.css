@@ -1,0 +1,114 @@
+.faq-page {
+    padding: 50px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+        background-image: url('../images/faq-bg.jpg');
+    
+        background-size: cover; 
+        background-attachment: fixed; 
+        background-repeat: no-repeat; 
+    font-family: 'Arial', sans-serif;
+}
+
+.faq-page h1 {
+    text-align: center;
+    margin-bottom: 50px;
+    margin-top: 80px;
+    font-size: 3rem;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    animation: fadeInDown 1s ease-out;
+}
+
+.faq-container {
+    width: 80%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    animation: fadeInUp 1s ease-out;
+    margin-top: 50px;
+}
+
+
+.faq-item {
+    background-color: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.faq-item:hover {
+    transform: translateY(-5px);
+}
+
+.faq-question {
+    width: 100%;
+    padding: 20px;
+    background-color: #444;
+    color: white;
+    border: none;
+    text-align: left;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.faq-question:hover {
+    background-color: #555;
+}
+
+.faq-answer {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-answer.active {
+    padding: 20px;
+    max-height: 500px;
+}
+
+.faq-answer p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #ccc;
+    line-height: 1.6;
+}
+
+.faq-question i {
+    transition: transform 0.3s ease;
+}
+
+.faq-question i.fa-chevron-up {
+    transform: rotate(180deg);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

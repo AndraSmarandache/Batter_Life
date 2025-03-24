@@ -1,0 +1,82 @@
+﻿@model BatterLife.Models.ContactModel
+@{
+    Layout = "_Layout";
+}
+
+<main class="contact-page">
+    <h1>Contact Us</h1>
+
+    <div class="contact-container">
+        <div class="contact-info">
+            <div class="info-item">
+                <h2>Address</h2>
+                <p>123 Sweet Street, Cake City</p>
+            </div>
+            <div class="info-item">
+                <h2>Phone</h2>
+                <p>+1 234 567 890</p>
+            </div>
+            <div class="info-item">
+                <h2>Email</h2>
+                <p>info@batterlife.com</p>
+            </div>
+            <div class="opening-hours">
+                <h2>Opening Hours</h2>
+                <p><strong>Monday - Friday:</strong> 9:00 AM - 7:00 PM</p>
+                <p><strong>Saturday:</strong> 10:00 AM - 6:00 PM</p>
+                <p><strong>Sunday:</strong> Closed</p>
+            </div>
+        </div>
+
+        <div class="contact-form">
+            <h2>Send Us a Message</h2>
+            <form id="contactForm" asp-action="Index" method="post">
+                <div class="form-group">
+                    <label asp-for="Name">Your Name</label>
+                    <input asp-for="Name" class="form-control" placeholder="Enter your name" required>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Email">Your Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="Enter your email" required>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Subject">Subject</label>
+                    <input asp-for="Subject" class="form-control" placeholder="Enter the subject" required>
+                    <span asp-validation-for="Subject" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Message">Your Message</label>
+                    <textarea asp-for="Message" class="form-control" rows="5" placeholder="Type your message here" required></textarea>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<div class="cart-overlay" id="overlay"></div>
+
+<div class="cart-sidebar" id="cart-sidebar">
+    <button class="close-cart-button" id="close-cart">Close</button>
+    <h1>Your Cart</h1>
+
+    <div class="cart-items">
+    </div>
+
+    <div class="cart-summary">
+        <h2>Order Summary</h2>
+        <p>Subtotal: <span id="subtotal">$0.00</span></p>
+        <button class="checkout-button">Proceed to Checkout</button>
+        <button class="continue-shopping-button">Continue Shopping</button>
+    </div>
+</div>
+<footer class="normal-footer">
+    <p>&copy; 2025 BatterLife. All rights reserved.</p>
+</footer>
+@section Scripts {
+    <script src="~/js/contact.js"></script>
+    <script type="module" src="~/js/cart.js"></script>
+}

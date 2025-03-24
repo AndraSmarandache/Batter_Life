@@ -1,0 +1,71 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div class="about-page">
+    <div class="about-hero">
+        <div class="hero-content">
+            <h1>About Us</h1>
+            <p>The most delicious cakes and pastries for any occasion!</p>
+        </div>
+    </div>
+
+    <div class="about-section scroll-animation">
+        <div class="section-content">
+            <div class="text-content">
+                <h2>Our Story</h2>
+                <p>
+                    Founded in 2020, BatterLife started as a small family-owned bakery in the heart of the city.
+                    Our passion for baking and creating unique flavors has made us a favorite among locals and visitors alike.
+                </p>
+            </div>
+            <div class="image-content">
+                <img src="~/images/story-bg.jpg" alt="Our Story" />
+            </div>
+        </div>
+    </div>
+
+    <div class="about-section scroll-animation">
+        <div class="section-content reverse">
+            <div class="text-content">
+                <h2>Our Mission</h2>
+                <p>
+                    At BatterLife, we believe in using only the finest ingredients to create treats that not only taste amazing
+                    but also bring joy to every occasion. From weddings to birthdays, we’re here to make your celebrations sweeter.
+                </p>
+            </div>
+            <div class="image-content">
+                <img src="~/images/mission-bg.jpg" alt="Our Mission" />
+            </div>
+        </div>
+    </div>
+
+    <div class="about-section scroll-animation">
+        <div class="section-content">
+            <div class="text-content">
+                <h2>Our Team</h2>
+                <p>
+                    Our team of talented bakers and pastry chefs is dedicated to crafting the perfect dessert for you.
+                    With years of experience and a love for creativity, we’re here to turn your ideas into delicious realities.
+                </p>
+            </div>
+            <div class="image-content">
+                <img src="~/images/team-bg.jpg" alt="Our Team" />
+            </div>
+        </div>
+    </div>
+
+    <div class="about-gallery">
+        <div class="gallery-container">
+            <button class="arrow left-arrow" onclick="showPreviousImage()">&larr;</button>
+            <div class="gallery-item">
+                <img src="~/images/cakes-gallery.jpg" alt="Gallery 1">
+                <div class="overlay">Our cakes</div>
+            </div>
+            <button class="arrow right-arrow" onclick="showNextImage()">&rarr;</button>
+        </div>
+    </div>
+</div>
+<footer class="normal-footer">
+    <p>&copy; 2025 BatterLife. All rights reserved.</p>
+</footer>
