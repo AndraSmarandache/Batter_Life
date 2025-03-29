@@ -11,17 +11,18 @@ namespace BatterLife.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(ContactModel model)
+        [ValidateAntiForgeryToken]
+        public IActionResult Submit(ContactModel model)
         {
             if (ModelState.IsValid)
             {
-                return View("ContactConfirmation");
+                return RedirectToAction("Confirmation");
             }
 
-            return View(model);
+            return View("Index", model);
         }
 
-        public IActionResult ContactConfirmation()
+        public IActionResult Confirmation()
         {
             return View();
         }

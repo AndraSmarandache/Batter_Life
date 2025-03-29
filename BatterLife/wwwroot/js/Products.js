@@ -1,152 +1,101 @@
-const categories = [
-  { id: 'all', name: 'All' },
-  { id: 'cakes', name: 'Cakes' },
-  { id: 'pastries', name: 'Pastries' },
-  { id: 'cookies', name: 'Cookies' },
-  { id: 'desserts', name: 'Desserts' },
-];
+document.addEventListener('DOMContentLoaded', function () {
+    const categoryFilters = document.querySelectorAll('.category-filters button');
+    const dropdownButtons = document.querySelectorAll('.dropdown-content button');
+    const dropdownButton = document.querySelector('.dropdown-button');
+    const productCards = document.querySelectorAll('.product-card');
+    const productList = document.querySelector('.product-list');
 
-const products = [
-  { id: 1, name: 'Chocolate Cake', category: 'cakes', price: 25, image: '../images/chocolate-cake.jpg', ingredients: ['Chocolate', 'Flour', 'Sugar', 'Eggs'] },
-  { id: 2, name: 'Strawberry Tart', category: 'pastries', price: 15, image: '../images/strawberry-tart.jpg', ingredients: ['Strawberries', 'Cream', 'Pastry'] },
-  { id: 3, name: 'Vanilla Cupcake', category: 'cakes', price: 5, image: '../images/vanilla-cupcake.jpg', ingredients: ['Vanilla', 'Flour', 'Sugar', 'Eggs'] },
-  { id: 4, name: 'Almond Cookies', category: 'cookies', price: 10, image: '../images/almond-cookies.jpg', ingredients: ['Almonds', 'Flour', 'Sugar', 'Butter'] },
-  { id: 5, name: 'Cheesecake', category: 'cakes', price: 20, image: '../images/cheesecake.jpg', ingredients: ['Cream Cheese', 'Biscuits', 'Sugar', 'Berries'] },
-  { id: 6, name: 'Macarons', category: 'pastries', price: 12, image: '../images/macarons.jpg', ingredients: ['Almond Flour', 'Sugar', 'Egg Whites', 'Food Coloring'] },
-  { id: 7, name: 'Brownies', category: 'cookies', price: 8, image: '../images/brownies.jpg', ingredients: ['Chocolate', 'Butter', 'Sugar', 'Flour'] },
-  { id: 8, name: 'Tiramisu', category: 'desserts', price: 18, image: '../images/tiramisu.jpg', ingredients: ['Mascarpone', 'Coffee', 'Ladyfingers', 'Cocoa'] },
-];
+    let selectedCategory = 'all';
+    let sortBy = 'name-asc';
 
-const productList = document.querySelector('.product-list');
-const categoryFilters = document.querySelectorAll('.category-filters button');
-const dropdownButtons = document.querySelectorAll('.dropdown-content button');
-const dropdownButton = document.querySelector('.dropdown-button');
+    initEventListeners();
 
-let selectedCategory = 'all';
-let sortBy = 'name-asc';
+    function initEventListeners() {
+        categoryFilters.forEach(button => {
+            button.addEventListener('click', () => handleCategoryFilter(button));
+        });
 
-function displayProducts() {
-  const filteredProducts = selectedCategory === 'all'
-      ? products
-      : products.filter(product => product.category === selectedCategory);
+        dropdownButtons.forEach(button => {
+            button.addEventListener('click', () => handleSort(button));
+        });
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-      if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
-      if (sortBy === 'name-desc') return b.name.localeCompare(a.name);
-      if (sortBy === 'price-asc') return a.price - b.price;
-      if (sortBy === 'price-desc') return b.price - a.price;
-      return 0;
-  });
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', handleAddToCart);
+        });
 
-  productList.innerHTML = '';
+        productCards.forEach(card => {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', function (e) {
+                if (!e.target.closest('.add-to-cart')) {
+                    const productId = this.dataset.productId;
+                    window.location.href = `/ProductDetails/Index/${productId}`;
+                }
+            });
+        });
+    }
 
-  sortedProducts.forEach(product => {
-      const productCard = `
-          <div class="product-card" data-product-id="${product.id}">
-              <div class="product-image">
-                  <img src="${product.image}" alt="${product.name}">
-                  <div class="overlay">
-                      <button class="add-to-cart">Add to Cart</button>
-                  </div>
-              </div>
-              <h3>${product.name}</h3>
-              <p>$${product.price}</p>
-          </div>
-      `;
-      productList.innerHTML += productCard;
-  });
+    function handleCategoryFilter(button) {
+        categoryFilters.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        selectedCategory = button.dataset.category;
+        filterProducts();
+    }
 
-  const addToCartButtons = document.querySelectorAll('.add-to-cart');
-  addToCartButtons.forEach(button => {
-      button.addEventListener('click', (event) => {
-          event.stopPropagation();
-          const productId = button.closest('.product-card').dataset.productId;
-          const product = products.find(p => p.id === parseInt(productId));
-          handleAddToCart(product);
-      });
-  });
+    function handleSort(button) {
+        sortBy = button.dataset.sort;
+        dropdownButton.textContent = button.textContent + ' ▼';
+        sortProducts();
+    }
 
-  const productCards = document.querySelectorAll('.product-card');
-  productCards.forEach(card => {
-      card.addEventListener('click', () => {
-          const productId = card.dataset.productId;
-          navigateToProductDetails(productId);
-      });
-  });
-}
+    function handleAddToCart(e) {
+        e.stopPropagation();
+        const productCard = e.target.closest('.product-card');
+        const productName = productCard.querySelector('h3').textContent;
+        alert(`${productName} added to cart!`);
+    }
 
-function handleAddToCart(product) {
-  alert(`${product.name} added to cart!`);
-}
+    function filterProducts() {
+        productCards.forEach(card => {
+            const category = card.dataset.category;
+            if (selectedCategory === 'all' || category === selectedCategory) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        sortProducts();
+    }
 
-function navigateToProductDetails(productId) {
-  window.location.href = `ProductDetails.html?id=${productId}`;
-}
+    function sortProducts() {
+        const cards = Array.from(document.querySelectorAll('.product-card[style="display: block;"], .product-card:not([style])'));
 
-categoryFilters.forEach(button => {
-  button.addEventListener('click', () => {
-      categoryFilters.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-      selectedCategory = button.dataset.category;
-      displayProducts();
-  });
-});
+        cards.sort((a, b) => {
+            const nameA = a.dataset.name.toLowerCase();
+            const nameB = b.dataset.name.toLowerCase();
+            const priceA = parseFloat(a.dataset.price);
+            const priceB = parseFloat(b.dataset.price);
 
-dropdownButtons.forEach(button => {
-  button.addEventListener('click', () => {
-      sortBy = button.dataset.sort;
-      dropdownButton.textContent = button.textContent + ' ▼';
-      displayProducts();
-  });
-});
+            if (sortBy === 'name-asc') return nameA.localeCompare(nameB);
+            if (sortBy === 'name-desc') return nameB.localeCompare(nameA);
+            if (sortBy === 'price-asc') return priceA - priceB;
+            if (sortBy === 'price-desc') return priceB - priceA;
+            return 0;
+        });
 
-displayProducts();
+        cards.forEach(card => productList.appendChild(card));
+    }
 
-let isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    dropdownButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.querySelector('.dropdown-content').classList.toggle('show');
+    });
 
-export function updateNavbar() {
-  const loginLink = document.getElementById("login-link");
-  const userLink = document.getElementById("user-link");
-
-  if (isLoggedIn) {
-      loginLink.style.display = "none";
-      userLink.style.display = "inline-block";
-  } else {
-      loginLink.style.display = "inline-block";
-      userLink.style.display = "none";
-  }
-}
-
-export function logout() {
-  isLoggedIn = false;
-  localStorage.setItem("isLoggedIn", "false");
-  updateNavbar();
-  alert("You have been logged out.");
-  window.location.href = "../html/login.html";
-}
-
-export function closeUserProfile() {
-  document.getElementById("user-profile-sidebar").classList.remove("active");
-  document.getElementById("user-profile-overlay").style.display = "none";
-}
-
-export function showSection(sectionId) {
-  const sections = document.querySelectorAll(".profile-section");
-  sections.forEach(section => {
-      section.classList.remove("active");
-      section.style.display = "none";
-  });
-  const activeSection = document.getElementById(sectionId);
-  activeSection.classList.add("active");
-  activeSection.style.display = "block";
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById("close-profile").addEventListener("click", function () {
-      closeUserProfile();
-  });
-
-  document.getElementById("user-profile-overlay").addEventListener("click", function () {
-      closeUserProfile();
-  });
+    window.addEventListener('click', function () {
+        const dropdowns = document.querySelectorAll('.dropdown-content');
+        dropdowns.forEach(dropdown => {
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    });
 });

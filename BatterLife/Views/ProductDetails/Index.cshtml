@@ -1,80 +1,92 @@
-﻿@model BatterLife.ViewModels.ProductDetailsViewModel
+﻿@model BatterLife.Models.Product
 @{
     Layout = "_Layout";
+    ViewData["Title"] = Model?.Name + " - BatterLife";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/ProductDetails.css" asp-append-version="true">
 }
 
 <main class="product-details-page">
     <button class="back-button" onclick="history.back()">Back to Products</button>
 
-    <div class="product-details-content fade-in">
-        <img class="product-details-image" src="@Model.Product.ImageUrl" alt="@Model.Product.Name">
+    @if (Model != null)
+    {
+        <div class="product-details-content fade-in">
+            <img class="product-details-image" src="@Model.ImageUrl" alt="@Model.Name">
 
-        <div class="product-info">
-            <h2 class="product-name">@Model.Product.Name</h2>
-            <p class="price">$@Model.Product.Price</p>
-            <p class="description">@Model.Product.Description</p>
-            <p class="ingredients">Ingredients: @string.Join(", ", Model.Product.Ingredients)</p>
-            <p class="allergens">Allergens: (Add allergens if needed)</p>
+            <div class="product-info">
+                <h2 class="product-name">@Model.Name</h2>
+                <p class="price"><strong>Price:</strong> $@Model.Price</p>
+                <p class="description">@Model.Description</p>
+                <p class="ingredients">Ingredients: @string.Join(", ", Model.Ingredients)</p>
+                <p class="allergens">Allergens: @string.Join(", ", Model.Allergens)</p>
 
-            <div class="quantity-container">
-                <label for="quantity">Quantity:</label>
-                <div class="quantity-selector">
-                    <button class="decrease-quantity">-</button>
-                    <input type="number" id="quantity" value="1" min="1">
-                    <button class="increase-quantity">+</button>
+                <div class="quantity-container">
+                    <label for="quantity">Quantity:</label>
+                    <div class="quantity-selector">
+                        <button class="decrease-quantity">-</button>
+                        <input type="number" id="quantity" value="1" min="1">
+                        <button class="increase-quantity">+</button>
+                    </div>
                 </div>
-            </div>
 
-            <button class="add-to-cart-button">Add to Cart</button>
+                <button class="add-to-cart-button">Add to Cart</button>
 
-            <div class="section">
-                <h3>Rating</h3>
-                <div class="rating">
-                    <span class="product-rating">@Model.Reviews.Average(r => r.Rating)</span>
-                    <div class="stars">
-                        @for (int i = 0; i < (int)Model.Reviews.Average(r => r.Rating); i++)
+                <div class="section">
+                    <h3>Rating</h3>
+                    <div class="rating">
+                        <span class="product-rating">@Model.Rating</span>
+                        <div class="stars">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                if (i < Math.Floor(Model.Rating))
+                                {
+                                    <span>★</span>
+                                }
+                                else
+                                {
+                                    <span>☆</span>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <button class="see-reviews-button">See Reviews</button>
+                    <div class="reviews" style="display: none;">
+                        @foreach (var review in Model.Reviews)
                         {
-                            <span class="star">&#9733;</span>
+                            <div class="review">
+                                <strong>@review.User</strong>
+                                <div class="stars">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        if (i < review.Rating)
+                                        {
+                                            <span>★</span>
+                                        }
+                                        else
+                                        {
+                                            <span>☆</span>
+                                        }
+                                    }
+                                </div>
+                                <p>@review.Comment</p>
+                            </div>
                         }
                     </div>
                 </div>
-                <button class="see-reviews-button">See Reviews</button>
-                <div class="reviews">
-                    @foreach (var review in Model.Reviews)
-                    {
-                        <div class="review">
-                            <p><strong>@review.UserName:</strong> @review.Comment</p>
-                            <p>Rating: @review.Rating</p>
-                        </div>
-                    }
-                </div>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="product-details-content">
+            <p>Product not found.</p>
+        </div>
+    }
 </main>
 
-<div class="overlay" id="overlay"></div>
-
-<div class="cart-sidebar" id="cart-sidebar">
-    <button class="close-cart-button" id="close-cart">Close</button>
-    <h1>Your Cart</h1>
-
-    <div class="cart-items">
-    </div>
-
-    <div class="cart-summary">
-        <h2>Order Summary</h2>
-        <p>Subtotal: <span id="subtotal">$0.00</span></p>
-        <button class="checkout-button">Proceed to Checkout</button>
-        <button class="continue-shopping-button">Continue Shopping</button>
-    </div>
-</div>
-
-<footer class="normal-footer">
-    <p>&copy; 2025 BatterLife. All rights reserved.</p>
-</footer>
-
 @section Scripts {
-    <script type="module" src="~/js/ProductDetails.js"></script>
-    <script type="module" src="~/js/cart.js"></script>
+    <script src="~/js/ProductDetails.js" asp-append-version="true"></script>
 }
