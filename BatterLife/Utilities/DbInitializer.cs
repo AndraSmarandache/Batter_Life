@@ -16,10 +16,10 @@ namespace BatterLife.Utilities
             {
                 var categories = new ProductCategory[]
                 {
-                    new ProductCategory{Name="Cakes", Description="Delicious cakes for all occasions"},
-                    new ProductCategory{Name="Pastries", Description="Flaky and buttery pastries"},
-                    new ProductCategory{Name="Cookies", Description="Sweet and crunchy cookies"},
-                    new ProductCategory{Name="Desserts", Description="Decadent desserts to satisfy your sweet tooth"}
+                    new ProductCategory{Name="Cakes"},
+                    new ProductCategory{Name="Pastries"},
+                    new ProductCategory{Name="Cookies"},
+                    new ProductCategory{Name="Desserts"}
                 };
 
                 context.ProductCategories.AddRange(categories);

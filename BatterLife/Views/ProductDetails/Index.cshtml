@@ -18,7 +18,7 @@
 
             <div class="product-info">
                 <h2 class="product-name">@Model.Name</h2>
-                <p class="price"><strong>Price:</strong> $@Model.Price</p>
+                <p class="price"><strong>Price:</strong> @Model.FormattedPrice</p>
                 <p class="description">@Model.Description</p>
                 <p class="ingredients">Ingredients: @string.Join(", ", Model.Ingredients)</p>
                 <p class="allergens">Allergens: @string.Join(", ", Model.Allergens)</p>
