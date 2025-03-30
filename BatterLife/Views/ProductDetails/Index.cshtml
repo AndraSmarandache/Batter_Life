@@ -1,0 +1,92 @@
+﻿@model BatterLife.Models.Product
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = Model?.Name + " - BatterLife";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/ProductDetails.css" asp-append-version="true">
+}
+
+<main class="product-details-page">
+    <button class="back-button" onclick="history.back()">Back to Products</button>
+
+    @if (Model != null)
+    {
+        <div class="product-details-content fade-in">
+            <img class="product-details-image" src="@Model.ImageUrl" alt="@Model.Name">
+
+            <div class="product-info">
+                <h2 class="product-name">@Model.Name</h2>
+                <p class="price"><strong>Price:</strong> $@Model.Price</p>
+                <p class="description">@Model.Description</p>
+                <p class="ingredients">Ingredients: @string.Join(", ", Model.Ingredients)</p>
+                <p class="allergens">Allergens: @string.Join(", ", Model.Allergens)</p>
+
+                <div class="quantity-container">
+                    <label for="quantity">Quantity:</label>
+                    <div class="quantity-selector">
+                        <button class="decrease-quantity">-</button>
+                        <input type="number" id="quantity" value="1" min="1">
+                        <button class="increase-quantity">+</button>
+                    </div>
+                </div>
+
+                <button class="add-to-cart-button">Add to Cart</button>
+
+                <div class="section">
+                    <h3>Rating</h3>
+                    <div class="rating">
+                        <span class="product-rating">@Model.Rating.ToString("0.0")</span>
+                        <div class="stars">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                if (i < Math.Floor(Model.Rating))
+                                {
+                                    <span>★</span>
+                                }
+                                else
+                                {
+                                    <span>☆</span>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <button class="see-reviews-button">See Reviews</button>
+                    <div class="reviews" style="display: none;">
+                        @foreach (var review in Model.Reviews)
+                        {
+                            <div class="review">
+                                <strong>@review.UserName</strong>
+                                <div class="stars">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        if (i < review.Rating)
+                                        {
+                                            <span>★</span>
+                                        }
+                                        else
+                                        {
+                                            <span>☆</span>
+                                        }
+                                    }
+                                </div>
+                                <p>@review.Comment</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="product-details-content">
+            <p>Product not found.</p>
+        </div>
+    }
+</main>
+
+@section Scripts {
+    <script src="~/js/ProductDetails.js" asp-append-version="true"></script>
+}

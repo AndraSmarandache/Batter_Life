@@ -1,7 +1,11 @@
 ﻿@model List<BatterLife.Models.Product>
-
 @{
     Layout = "_Layout";
+    ViewData["Title"] = "Products - BatterLife";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/products.css" asp-append-version="true">
 }
 
 <main class="products-page">
@@ -32,7 +36,8 @@
     <div class="product-list">
         @foreach (var product in Model)
         {
-            <div class="product-card" data-product-id="@product.Id">
+            <div class="product-card" data-product-id="@product.Id" data-category="@product.Category"
+                 data-name="@product.Name" data-price="@product.Price">
                 <div class="product-image">
                     <img src="@product.ImageUrl" alt="@product.Name">
                     <div class="overlay">
@@ -41,151 +46,17 @@
                 </div>
                 <h3>@product.Name</h3>
                 <p>$@product.Price</p>
-                <a asp-controller="ProductDetails" asp-action="Index" asp-route-id="@product.Id">View Details</a>
             </div>
         }
     </div>
 </main>
-<div class="cart-overlay" id="overlay"></div>
-<div class="cart-sidebar" id="cart-sidebar">
-    <button class="close-cart-button" id="close-cart">Close</button>
-    <h1>Your Cart</h1>
-    <div class="cart-items">
-    </div>
-    <div class="cart-summary">
-        <h2>Order Summary</h2>
-        <p>Subtotal: <span id="subtotal">$0.00</span></p>
-        <button class="checkout-button">Proceed to Checkout</button>
-        <button class="continue-shopping-button">Continue Shopping</button>
-    </div>
-</div>
-<div class="user-profile-overlay" id="user-profile-overlay"></div>
-<div class="user-profile-sidebar" id="user-profile-sidebar">
-    <button class="close-profile-button" id="close-profile">Close</button>
-    <div class="user-profile-header">
-        <h1>User Profile</h1>
-    </div>
-    <div class="profile-buttons">
-        <button onclick="showSection('account-info')">Account Info</button>
-        <button onclick="showSection('change-password')">Change Password</button>
-        <button onclick="showSection('orders')">My Orders</button>
-        <button onclick="logout()">Logout</button>
-    </div>
-    <div class="profile-sections">
-        <div id="account-info" class="profile-section active">
-            <h2>Account Information</h2>
-            <form id="accountInfoForm">
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" value="John Doe" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" value="johndoe@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone" value="+1234567890" required>
-                </div>
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    <input type="text" id="address" name="address" value="123 Main St, New York" required>
-                </div>
-                <button type="submit">Save Changes</button>
-            </form>
-        </div>
-        <div id="change-password" class="profile-section">
-            <h2>Change Password</h2>
-            <form id="changePasswordForm">
-                <div class="form-group">
-                    <label for="current-password">Current Password</label>
-                    <input type="password" id="current-password" name="current-password" placeholder="Enter current password" required>
-                </div>
-                <div class="form-group">
-                    <label for="new-password">New Password</label>
-                    <input type="password" id="new-password" name="new-password" placeholder="Enter new password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirm-new-password">Confirm New Password</label>
-                    <input type="password" id="confirm-new-password" name="confirm-new-password" placeholder="Confirm new password" required>
-                </div>
-                <button type="submit">Change Password</button>
-            </form>
-        </div>
-        <div id="orders" class="profile-section">
-            <h2>My Orders</h2>
-            <div class="orders-list">
-                <div class="order-item">
-                    <h3>Order #12345</h3>
-                    <p>Date: 2023-10-01</p>
-                    <p>Total: $50.00</p>
-                    <p>Status: Delivered</p>
-                </div>
-                <div class="order-item">
-                    <h3>Order #12346</h3>
-                    <p>Date: 2023-10-05</p>
-                    <p>Total: $75.00</p>
-                    <p>Status: In Transit</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<footer class="normal-footer">
-    <p>&copy; 2025 BatterLife. All rights reserved.</p>
-</footer>
+
+@section Footer {
+    <footer class="normal-footer">
+        <p>&copy; 2025 BatterLife. All rights reserved.</p>
+    </footer>
+}
 
 @section Scripts {
-    <script type="module" src="~/js/products.js"></script>
-    <script type="module" src="~/js/cart.js"></script>
-    <script>
-        let isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-        function updateNavbar() {
-            const loginLink = document.getElementById("login-link");
-            const userLink = document.getElementById("user-link");
-            if (isLoggedIn) {
-                loginLink.style.display = "none";
-                userLink.style.display = "inline-block";
-            } else {
-                loginLink.style.display = "inline-block";
-                userLink.style.display = "none";
-            }
-        }
-        function logout() {
-            isLoggedIn = false;
-            localStorage.setItem("isLoggedIn", "false");
-            updateNavbar();
-            alert("You have been logged out.");
-            window.location.href = "../html/login.html";
-        }
-        function openUserProfile() {
-            document.getElementById("user-profile-sidebar").classList.add("active");
-            document.getElementById("user-profile-overlay").style.display = "block";
-        }
-        function closeUserProfile() {
-            document.getElementById("user-profile-sidebar").classList.remove("active");
-            document.getElementById("user-profile-overlay").style.display = "none";
-        }
-        function showSection(sectionId) {
-            const sections = document.querySelectorAll(".profile-section");
-            sections.forEach(section => {
-                section.classList.remove("active");
-                section.style.display = "none";
-            });
-            const activeSection = document.getElementById(sectionId);
-            activeSection.classList.add("active");
-            activeSection.style.display = "block";
-        }
-        document.getElementById("user-link").addEventListener("click", function (e) {
-            e.preventDefault();
-            openUserProfile();
-        });
-        document.getElementById("close-profile").addEventListener("click", function () {
-            closeUserProfile();
-        });
-        document.getElementById("user-profile-overlay").addEventListener("click", function () {
-            closeUserProfile();
-        });
-        updateNavbar();
-    </script>
+    <script src="~/js/products.js" asp-append-version="true"></script>
 }
