@@ -6,6 +6,7 @@ namespace BatterLife.Controllers
     {
         public IActionResult Index()
         {
+            ViewData["Title"] = "About Us - BatterLife";
             return View();
         }
     }
