@@ -1,47 +1,86 @@
 ﻿@model IEnumerable<BatterLife.Models.Review>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Reviews Management";
 }
 
-<h1>Index</h1>
+<style>
+    .reviews-container {
+        padding-top: 80px;
+        margin: 0 auto;
+        max-width: 1200px;
+        padding-bottom: 40px;
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Comment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Rating)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.User)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Comment)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Rating)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    .reviews-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+        .reviews-table th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .reviews-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+    .action-links a {
+        margin-right: 10px;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .create-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="reviews-container">
+    <h1>Reviews Management</h1>
+
+    <a asp-action="Create" class="create-btn">Create New Review</a>
+
+    <table class="reviews-table">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.User)</th>
+                <th>@Html.DisplayNameFor(model => model.Comment)</th>
+                <th>@Html.DisplayNameFor(model => model.Rating)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.User)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Comment)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Rating)/5</td>
+                    <td class="action-links">
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+        <div class="no-reviews">
+            <p>No reviews found.</p>
+        </div>
+    }
+</div>

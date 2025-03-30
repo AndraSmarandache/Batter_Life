@@ -1,43 +1,86 @@
 ﻿@model BatterLife.Models.Review
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create New Review";
 }
 
-<h1>Create</h1>
+<style>
+    .create-container {
+        padding-top: 80px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
 
-<h4>Review</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+    .create-form {
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .form-header {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-control {
+        border-radius: 4px;
+        padding: 10px;
+    }
+
+    .btn-create {
+        background-color: #28a745;
+        border: none;
+        padding: 10px 20px;
+        margin-top: 15px;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #6c757d;
+    }
+</style>
+
+<div class="create-container">
+    <div class="create-form">
+        <div class="form-header">
+            <h1>Create New Review</h1>
+        </div>
+
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group">
                 <label asp-for="User" class="control-label"></label>
                 <input asp-for="User" class="form-control" />
                 <span asp-validation-for="User" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Comment" class="control-label"></label>
-                <input asp-for="Comment" class="form-control" />
+                <textarea asp-for="Comment" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Comment" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Rating" class="control-label"></label>
-                <input asp-for="Rating" class="form-control" />
+                <input asp-for="Rating" type="number" min="1" max="5" class="form-control" />
                 <span asp-validation-for="Rating" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-primary btn-create" />
             </div>
         </form>
+
+        <a asp-action="Index" class="back-link">Back to List</a>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
