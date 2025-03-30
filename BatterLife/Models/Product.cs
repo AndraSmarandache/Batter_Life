@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 
 namespace BatterLife.Models
 {
@@ -8,7 +10,9 @@ namespace BatterLife.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public decimal Price { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }  // Stocare corectă în baza de date (20.00)
         public string ImageUrl { get; set; } = string.Empty;
         public List<string> Ingredients { get; set; } = new List<string>();
         public List<string> Allergens { get; set; } = new List<string>();
@@ -18,5 +22,7 @@ namespace BatterLife.Models
 
         [NotMapped]
         public double Rating { get; set; }
+        [NotMapped]
+        public string FormattedPrice => Price.ToString("0.00", CultureInfo.InvariantCulture) + " RON";
     }
 }
