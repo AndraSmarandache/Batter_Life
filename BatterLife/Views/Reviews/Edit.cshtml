@@ -58,8 +58,8 @@
         padding: 12px;
         border: 1px solid #444;
         border-radius: 5px;
-        background-color: #1a1a1a;
-        color: white;
+        background-color: white;
+        color: #1a1a1a;
         font-size: 1.1rem;
         transition: border-color 0.3s ease;
     }
@@ -162,12 +162,7 @@
                 <label asp-for="Rating" class="form-control-label"></label>
                 <div class="rating-input">
                     <input asp-for="Rating" type="number" min="1" max="5" class="form-control" />
-                    <div class="rating-stars">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            <span>★</span>
-                        }
-                    </div>
+            
                 </div>
                 <span asp-validation-for="Rating" class="text-danger"></span>
             </div>
