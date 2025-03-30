@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Reviews Management";
+    Layout = "_Layout";
 }
 
 <style>
@@ -44,6 +45,11 @@
         border-radius: 4px;
         margin-bottom: 20px;
     }
+
+    .no-reviews {
+        margin-top: 20px;
+        color: #6c757d;
+    }
 </style>
 
 <div class="reviews-container">
@@ -54,9 +60,11 @@
     <table class="reviews-table">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(model => model.User)</th>
-                <th>@Html.DisplayNameFor(model => model.Comment)</th>
-                <th>@Html.DisplayNameFor(model => model.Rating)</th>
+                <th>User</th>
+                <th>Product</th>
+                <th>Comment</th>
+                <th>Rating</th>
+                <th>Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -64,9 +72,11 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => item.User)</td>
+                    <td>@Html.DisplayFor(modelItem => item.UserName)</td>
+                    <td>@(item.Product?.Name ?? "N/A")</td>
                     <td>@Html.DisplayFor(modelItem => item.Comment)</td>
                     <td>@Html.DisplayFor(modelItem => item.Rating)/5</td>
+                    <td>@item.CreatedAt.ToString("d")</td>
                     <td class="action-links">
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                         <a asp-action="Details" asp-route-id="@item.Id">Details</a>
