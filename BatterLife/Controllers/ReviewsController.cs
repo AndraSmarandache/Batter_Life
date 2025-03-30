@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BatterLife.Models;
+using System.Threading.Tasks;
 
 namespace BatterLife.Controllers
 {
@@ -21,7 +18,10 @@ namespace BatterLife.Controllers
         // GET: Reviews
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Reviews.ToListAsync());
+            var reviews = await _context.Reviews
+                .Include(r => r.Product) // Include product information
+                .ToListAsync();
+            return View(reviews);
         }
 
         // GET: Reviews/Details/5
@@ -33,6 +33,7 @@ namespace BatterLife.Controllers
             }
 
             var review = await _context.Reviews
+                .Include(r => r.Product)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (review == null)
             {
@@ -45,22 +46,25 @@ namespace BatterLife.Controllers
         // GET: Reviews/Create
         public IActionResult Create()
         {
+            // Load products for dropdown
+            ViewBag.Products = new SelectList(_context.Products, "Id", "Name");
             return View();
         }
 
         // POST: Reviews/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,User,Comment,Rating")] Review review)
+        public async Task<IActionResult> Create([Bind("Id,ProductId,UserName,Comment,Rating")] Review review)
         {
             if (ModelState.IsValid)
             {
+                review.CreatedAt = DateTime.UtcNow;
                 _context.Add(review);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            // Reload products if validation fails
+            ViewBag.Products = new SelectList(_context.Products, "Id", "Name", review.ProductId);
             return View(review);
         }
 
@@ -77,15 +81,16 @@ namespace BatterLife.Controllers
             {
                 return NotFound();
             }
+
+            // Load products with selected product
+            ViewBag.Products = new SelectList(_context.Products, "Id", "Name", review.ProductId);
             return View(review);
         }
 
         // POST: Reviews/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,User,Comment,Rating")] Review review)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ProductId,UserName,Comment,Rating,CreatedAt")] Review review)
         {
             if (id != review.Id)
             {
@@ -112,6 +117,7 @@ namespace BatterLife.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Products = new SelectList(_context.Products, "Id", "Name", review.ProductId);
             return View(review);
         }
 
@@ -124,6 +130,7 @@ namespace BatterLife.Controllers
             }
 
             var review = await _context.Reviews
+                .Include(r => r.Product)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (review == null)
             {
