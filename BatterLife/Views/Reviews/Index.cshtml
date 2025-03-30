@@ -1,96 +1,195 @@
 ﻿@model IEnumerable<BatterLife.Models.Review>
-
 @{
     ViewData["Title"] = "Reviews Management";
     Layout = "_Layout";
 }
 
 <style>
+    .reviews-management-page {
+        padding-top: 120px;
+        padding-left: 20px;
+        padding-right: 20px;
+        color: white;
+        background-color: #1a1a1a;
+        min-height: 100vh;
+        font-size: 1.1rem;
+    }
+
     .reviews-container {
-        padding-top: 80px;
-        margin: 0 auto;
         max-width: 1200px;
+        margin: 0 auto;
         padding-bottom: 40px;
     }
+
+    .page-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #ff6f61;
+            margin-bottom: 20px;
+        }
+
+    .create-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #ff6f61;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+        .create-btn:hover {
+            background-color: #e65a50;
+            transform: translateY(-2px);
+        }
 
     .reviews-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
+        background-color: #333;
+        border-radius: 10px;
+        overflow: hidden;
     }
 
         .reviews-table th {
-            background-color: #f8f9fa;
-            padding: 12px;
+            background-color: #444;
+            padding: 15px;
             text-align: left;
+            color: white;
+            font-weight: 600;
         }
 
         .reviews-table td {
-            padding: 12px;
-            border-bottom: 1px solid #dee2e6;
+            padding: 15px;
+            border-bottom: 1px solid #444;
+            color: #ccc;
         }
 
-    .action-links a {
-        margin-right: 10px;
-        color: #007bff;
-        text-decoration: none;
+        .reviews-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .reviews-table tr:hover td {
+            background-color: #3a3a3a;
+        }
+
+    .rating-cell {
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
-    .create-btn {
-        display: inline-block;
-        padding: 8px 16px;
-        background-color: #28a745;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        margin-bottom: 20px;
+    .rating-stars {
+        color: gold;
     }
+
+    .action-links {
+        display: flex;
+        gap: 10px;
+    }
+
+    .action-link {
+        color: #ff6f61;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .action-link:hover {
+            color: #e65a50;
+            text-decoration: underline;
+        }
 
     .no-reviews {
-        margin-top: 20px;
-        color: #6c757d;
+        margin-top: 40px;
+        text-align: center;
+        color: #777;
+        font-size: 1.2rem;
+        padding: 30px;
+        background-color: #333;
+        border-radius: 10px;
+    }
+
+    .product-name {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .comment-preview {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .date-cell {
+        white-space: nowrap;
     }
 </style>
 
-<div class="reviews-container">
-    <h1>Reviews Management</h1>
-
-    <a asp-action="Create" class="create-btn">Create New Review</a>
-
-    <table class="reviews-table">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Product</th>
-                <th>Comment</th>
-                <th>Rating</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => item.UserName)</td>
-                    <td>@(item.Product?.Name ?? "N/A")</td>
-                    <td>@Html.DisplayFor(modelItem => item.Comment)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Rating)/5</td>
-                    <td>@item.CreatedAt.ToString("d")</td>
-                    <td class="action-links">
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    @if (!Model.Any())
-    {
-        <div class="no-reviews">
-            <p>No reviews found.</p>
+<div class="reviews-management-page">
+    <div class="reviews-container">
+        <div class="page-header">
+            <h1>Reviews Management</h1>
+            <a asp-action="Create" class="create-btn">Create New Review</a>
         </div>
-    }
+
+        @if (Model.Any())
+        {
+            <table class="reviews-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Product</th>
+                        <th>Comment</th>
+                        <th>Rating</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.UserName)</td>
+                            <td class="product-name">@(item.Product?.Name ?? "N/A")</td>
+                            <td class="comment-preview">@Html.DisplayFor(modelItem => item.Comment)</td>
+                            <td class="rating-cell">
+                                <span class="rating-stars">
+                                    @for (int i = 0; i < item.Rating; i++)
+                                    {
+                                        <span>★</span>
+                                    }
+                                    @for (int i = item.Rating; i < 5; i++)
+                                    {
+                                        <span>☆</span>
+                                    }
+                                </span>
+                                (@item.Rating/5)
+                            </td>
+                            <td class="date-cell">@item.CreatedAt.ToString("d")</td>
+                            <td class="action-links">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="action-link">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="action-link">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="action-link">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="no-reviews">
+                <p>No reviews found.</p>
+            </div>
+        }
+    </div>
 </div>
