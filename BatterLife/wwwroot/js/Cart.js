@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     const overlay = document.getElementById('overlay');
     const cartSidebar = document.getElementById('cart-sidebar');
     const openCartButton = document.getElementById('open-cart');
@@ -16,14 +16,14 @@ document.addEventListener('DOMContentLoaded', function () {
             id: 'prod1',
             name: 'Chocolate Cake',
             price: 24.99,
-            image: '~/images/chocolate-cake.jpg',
+            image: '/images/chocolate-cake.jpg',
             quantity: 1
         },
         {
             id: 'prod2',
             name: 'Tiramisu',
             price: 18,
-            image: '~/images/tiramisu.jpg',
+            image: '/images/tiramisu.jpg',
             quantity: 2
         }
     ];
