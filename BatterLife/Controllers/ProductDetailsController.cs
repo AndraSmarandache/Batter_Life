@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BatterLife.Models;
+﻿using BatterLife.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace BatterLife.Controllers
 {
@@ -14,29 +13,25 @@ namespace BatterLife.Controllers
             _context = context;
         }
 
-        public IActionResult Index(int id)
+        public async Task<IActionResult> Index(int id)
         {
-            var product = _context.Products
+            var product = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Reviews)
-                .FirstOrDefault(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
 
-            product.Rating = product.Reviews.Any() ?
-                product.Reviews.Average(r => r.Rating) : 0;
+            product.Rating = product.Reviews.Any() ? product.Reviews.Average(r => r.Rating) : 0;
 
             return View(product);
         }
 
         [HttpPost]
-        public IActionResult AddToCart(int productId, int quantity)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
-            var product = _context.Products.Find(productId);
-
+            var product = await _context.Products.FindAsync(productId);
             if (product == null)
             {
                 return Json(new { success = false, message = "Product not found" });
@@ -45,31 +40,16 @@ namespace BatterLife.Controllers
             return Json(new
             {
                 success = true,
-                message = $"Added {quantity} {product.Name}(s) to cart",
-                totalPrice = product.Price * quantity
-            });
-        }
-
-        [HttpGet]
-        public IActionResult GetReviews(int productId)
-        {
-            var product = _context.Products
-                .Include(p => p.Reviews)
-                .FirstOrDefault(p => p.Id == productId);
-
-            if (product == null)
-            {
-                return Json(new { success = false, message = "Product not found" });
-            }
-
-            return Json(new
-            {
-                success = true,
-                reviews = product.Reviews.Select(r => new {
-                    UserName = r.UserName,
-                    Comment = r.Comment,
-                    Rating = r.Rating
-                })
+                product = new
+                {
+                    id = product.Id,
+                    name = product.Name,
+                    price = product.Price,
+                    imageUrl = product.ImageUrl,
+                    formattedPrice = product.FormattedPrice
+                },
+                quantity = quantity,
+                message = $"{quantity} {product.Name}(s) added to cart"
             });
         }
     }

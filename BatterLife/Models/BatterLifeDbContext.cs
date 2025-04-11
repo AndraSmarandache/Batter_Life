@@ -1,4 +1,4 @@
-﻿using BatterLife.Models.BatterLife.Models;
+﻿
 using Microsoft.EntityFrameworkCore;
 
 namespace BatterLife.Models

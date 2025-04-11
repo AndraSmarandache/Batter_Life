@@ -1,4 +1,8 @@
 using BatterLife.Models;
+using BatterLife.Repositories.Interfaces;
+using BatterLife.Repositories;
+using BatterLife.Services.Interfaces;
+using BatterLife.Services;
 using BatterLife.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +12,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<BatterLifeDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BatterLifeDb")));
-// Add this right after creating the app builder
+
+// Add session support
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = "BatterLife.Session";
+});
+
+// Add repository and service dependencies
+builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICartService, CartService>();
+
 var app = builder.Build();
 
 // Initialize the database
@@ -31,19 +49,18 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-      app.UseHsts();
+    app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
-
-app.UseStaticFiles(); 
-
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
-
 app.UseAuthorization();
 
-app.MapStaticAssets();
+// Add session middleware
+app.UseSession();
 
+app.MapStaticAssets();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
