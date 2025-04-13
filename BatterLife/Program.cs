@@ -55,10 +55,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
 
-// Add session middleware
-app.UseSession();
+
 
 app.MapStaticAssets();
 app.MapControllerRoute(

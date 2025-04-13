@@ -1,6 +1,7 @@
 ﻿using BatterLife.Models;
 using BatterLife.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace BatterLife.Repositories
 {
@@ -8,35 +9,26 @@ namespace BatterLife.Repositories
     {
         public CartRepository(BatterLifeDbContext context) : base(context) { }
 
-        public async Task<Cart?> GetBySessionIdAsync(string sessionId)
+        public async Task<Cart> GetCartWithItemsAsync(string sessionId)
         {
             return await Context.Carts
                 .Include(c => c.CartItems)
                 .ThenInclude(ci => ci.Product)
-                .FirstOrDefaultAsync(c => c.SessionId == sessionId);
+                .FirstOrDefaultAsync(c => c.SessionId == sessionId)
+                ?? new Cart { SessionId = sessionId };
         }
 
         public async Task AddItemToCartAsync(string sessionId, int productId, int quantity)
         {
-            var cart = await GetBySessionIdAsync(sessionId);
-            var product = await Context.Products.FindAsync(productId);
+            var cart = await GetCartWithItemsAsync(sessionId);
 
-            if (product == null)
+            if (cart.Id == 0) 
             {
-                throw new ArgumentException("Product not found", nameof(productId));
-            }
-
-            if (cart == null)
-            {
-                cart = new Cart
-                {
-                    SessionId = sessionId,
-                    CartItems = new List<CartItem>()
-                };
                 Context.Carts.Add(cart);
             }
 
             var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;
@@ -49,8 +41,6 @@ namespace BatterLife.Repositories
                     Quantity = quantity
                 });
             }
-
-            await Context.SaveChangesAsync();
         }
     }
 }

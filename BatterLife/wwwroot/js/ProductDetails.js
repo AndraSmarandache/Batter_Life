@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     let quantity = 1;
     const quantityInput = document.getElementById('quantity');
     const priceElement = document.querySelector('.price');

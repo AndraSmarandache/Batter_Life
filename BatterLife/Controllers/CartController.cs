@@ -1,7 +1,6 @@
 ﻿using BatterLife.Models;
 using BatterLife.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace BatterLife.Controllers
@@ -9,68 +8,80 @@ namespace BatterLife.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
-        private readonly BatterLifeDbContext _context; 
 
-        public CartController(ICartService cartService, BatterLifeDbContext context) 
+        public CartController(ICartService cartService)
         {
             _cartService = cartService;
-            _context = context; 
-        }
-
-        public async Task<IActionResult> Index()
-        {
-            var sessionId = GetSessionId();
-            var cart = await _cartService.GetOrCreateCartAsync(sessionId);
-            return View(cart);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddItem(int productId, int quantity)
+        public async Task<IActionResult> AddItem([FromBody] CartItemRequest request)
         {
+            HttpContext.Session.SetString("Init", "1");
             var sessionId = HttpContext.Session.Id;
-            var product = await _context.Products.FindAsync(productId); 
 
-            if (product == null)
-            {
-                return Json(new { success = false, message = "Product not found" });
-            }
-
-            await _cartService.AddToCartAsync(sessionId, productId, quantity);
+            var result = await _cartService.AddItemToCartAsync(sessionId, request.ProductId, request.Quantity);
 
             return Json(new
             {
-                success = true,
-                message = $"{quantity} {product.Name}(s) added to cart"
+                success = result.Success,
+                message = result.Message,
+                cartCount = await _cartService.GetCartCountAsync(sessionId)
             });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCartItems()
+        {
+            var sessionId = HttpContext.Session.Id;
+            var cart = await _cartService.GetCartWithItemsAsync(sessionId);
+
+            var items = cart.CartItems.Select(ci => new {
+                id = ci.ProductId,
+                name = ci.Product?.Name ?? "Unknown Product",
+                price = ci.Product?.Price ?? 0,
+                image = ci.Product?.ImageUrl ?? "/images/placeholder.png",
+                quantity = ci.Quantity
+            }).ToList();
+
+            return Json(new { items });
         }
 
         [HttpPost]
         public async Task<IActionResult> UpdateItem(int productId, int quantity)
         {
-            var sessionId = GetSessionId();
+            var sessionId = HttpContext.Session.Id;
             await _cartService.UpdateCartItemAsync(sessionId, productId, quantity);
-            return RedirectToAction("Index");
+            return Json(new
+            {
+                success = true,
+                cartCount = await _cartService.GetCartCountAsync(sessionId)
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> RemoveItem(int productId)
         {
-            var sessionId = GetSessionId();
+            var sessionId = HttpContext.Session.Id;
             await _cartService.RemoveFromCartAsync(sessionId, productId);
-            return RedirectToAction("Index");
+            return Json(new
+            {
+                success = true,
+                cartCount = await _cartService.GetCartCountAsync(sessionId)
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> Checkout()
         {
-            var sessionId = GetSessionId();
-            await _cartService.ClearCartAsync(sessionId);
-            return View("OrderConfirmation");
+            var sessionId = HttpContext.Session.Id;
+            return Json(new { success = true });
         }
+    }
 
-        private string GetSessionId()
-        {
-            return HttpContext.Session.Id;
-        }
+    public class CartItemRequest
+    {
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
     }
 }

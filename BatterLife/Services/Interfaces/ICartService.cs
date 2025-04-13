@@ -5,10 +5,16 @@ namespace BatterLife.Services.Interfaces
 {
     public interface ICartService
     {
-        Task<Cart> GetOrCreateCartAsync(string sessionId);
-        Task AddToCartAsync(string sessionId, int productId, int quantity);
+        Task<Cart> GetCartWithItemsAsync(string sessionId);
+        Task<CartOperationResult> AddItemToCartAsync(string sessionId, int productId, int quantity);
         Task UpdateCartItemAsync(string sessionId, int productId, int quantity);
         Task RemoveFromCartAsync(string sessionId, int productId);
-        Task ClearCartAsync(string sessionId);
+        Task<int> GetCartCountAsync(string sessionId);
+    }
+
+    public class CartOperationResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
     }
 }

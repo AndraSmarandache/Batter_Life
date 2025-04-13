@@ -36,8 +36,11 @@
     <div class="product-list">
         @foreach (var product in Model)
         {
-            <div class="product-card" data-product-id="@product.Id" data-category="@product.Category"
-                 data-name="@product.Name" data-price="@product.Price">
+            <div class="product-card"
+                 data-product-id="@product.Id"
+                 data-category="@product.Category.Name.ToLower()"
+                 data-name="@product.Name"
+                 data-price="@product.Price.ToString("0.00")">
                 <div class="product-image">
                     <img src="@product.ImageUrl" alt="@product.Name">
                     <div class="overlay">
@@ -45,7 +48,7 @@
                     </div>
                 </div>
                 <h3>@product.Name</h3>
-                <p>$@product.Price</p>
+                <p>$@product.Price.ToString("0.00")</p>
             </div>
         }
     </div>

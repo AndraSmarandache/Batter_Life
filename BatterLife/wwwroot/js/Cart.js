@@ -11,12 +11,40 @@
     const checkoutButton = document.querySelector('.checkout-button');
     const continueShoppingButton = document.getElementById('continue-shopping');
 
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let cart = [];
     let scrollPosition = 0;
 
-    function initCart() {
+    initCart();
+
+    async function initCart() {
+        console.log('Initializing cart...');
+        await loadCartFromServer();
         updateCartDisplay();
         updateCartCount();
+    }
+
+    async function loadCartFromServer() {
+        console.log('Loading cart from server...');
+        try {
+            const response = await fetch('/Cart/GetCartItems', {
+                credentials: 'include' 
+            });
+
+            console.log('Cart response status:', response.status);
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Cart data received:', data);
+
+                cart = Array.isArray(data.items) ? data.items : [];
+                console.log('Cart after processing:', cart);
+            } else {
+                console.error('Failed to load cart:', response.status);
+            }
+        } catch (error) {
+            console.error('Error loading cart:', error);
+            cart = [];
+        }
     }
 
     function openCart() {
@@ -43,8 +71,10 @@
     }
 
     function updateCartDisplay() {
+        console.log('Updating cart display with:', cart);
         cartItemsContainer.innerHTML = '';
-        if (cart.length === 0) {
+
+        if (!cart || cart.length === 0) {
             cartItemsContainer.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
             subtotalElement.textContent = '$0.00';
             shippingElement.textContent = '$0.00';
@@ -54,15 +84,16 @@
 
         let subtotal = 0;
         cart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
+            const itemTotal = parseFloat(item.price) * parseInt(item.quantity);
             subtotal += itemTotal;
+
             const cartItemElement = document.createElement('div');
             cartItemElement.className = 'cart-item';
             cartItemElement.innerHTML = `
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${item.image || '/images/placeholder.png'}" alt="${item.name || 'Product'}">
                 <div class="cart-item-details">
-                    <h3>${item.name}</h3>
-                    <p class="price">$${item.price.toFixed(2)}</p>
+                    <h3>${item.name || 'Unknown Product'}</h3>
+                    <p class="price">$${(parseFloat(item.price) || 0).toFixed(2)}</p>
                     <div class="quantity-selector">
                         <button class="decrease" data-id="${item.id}">-</button>
                         <input type="number" value="${item.quantity}" min="1" data-id="${item.id}">
@@ -78,15 +109,30 @@
 
         const shipping = subtotal > 50 ? 0 : 5;
         const total = subtotal + shipping;
+
         subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-        shippingElement.textContent = subtotal > 50 ? '$0.00' : '$5.00';
+        shippingElement.textContent = `$${shipping.toFixed(2)}`;
         totalElement.textContent = `$${total.toFixed(2)}`;
+
         addCartItemEventListeners();
     }
 
-    function updateCartCount() {
-        const count = cart.reduce((total, item) => total + item.quantity, 0);
-        cartCount.textContent = count;
+    async function updateCartCount() {
+        try {
+            const response = await fetch('/Cart/GetCartItems', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const count = Array.isArray(data.items)
+                    ? data.items.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0)
+                    : 0;
+                cartCount.textContent = count;
+            }
+        } catch (error) {
+            console.error('Error updating cart count:', error);
+        }
     }
 
     function addCartItemEventListeners() {
@@ -104,101 +150,124 @@
         });
     }
 
-    function decreaseQuantity(e) {
+    async function decreaseQuantity(e) {
         const id = e.target.getAttribute('data-id');
-        const item = cart.find(item => item.id === id);
-        if (item.quantity > 1) {
-            item.quantity--;
-            updateCart();
+        const response = await fetch(`/Cart/UpdateItem?productId=${id}&quantity=-1`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (response.ok) {
+            await loadCartFromServer();
+            updateCartDisplay();
+            await updateCartCount();
         }
     }
 
-    function increaseQuantity(e) {
+    async function increaseQuantity(e) {
         const id = e.target.getAttribute('data-id');
-        const item = cart.find(item => item.id === id);
-        item.quantity++;
-        updateCart();
+        const response = await fetch(`/Cart/UpdateItem?productId=${id}&quantity=1`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (response.ok) {
+            await loadCartFromServer();
+            updateCartDisplay();
+            await updateCartCount();
+        }
     }
 
-    function updateQuantity(e) {
+    async function updateQuantity(e) {
         const id = e.target.getAttribute('data-id');
-        const item = cart.find(item => item.id === id);
         const newQuantity = parseInt(e.target.value);
         if (newQuantity > 0) {
-            item.quantity = newQuantity;
-            updateCart();
+            const response = await fetch(`/Cart/UpdateItem?productId=${id}&quantity=${newQuantity}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                await loadCartFromServer();
+                updateCartDisplay();
+                await updateCartCount();
+            }
         } else {
-            e.target.value = item.quantity;
+            e.target.value = 1;
         }
     }
 
-    function removeItem(e) {
+    async function removeItem(e) {
         const id = e.target.closest('button').getAttribute('data-id');
-        cart = cart.filter(item => item.id !== id);
-        updateCart();
-    }
-
-    function updateCart() {
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartDisplay();
-        updateCartCount();
+        const response = await fetch(`/Cart/RemoveItem?productId=${id}`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (response.ok) {
+            await loadCartFromServer();
+            updateCartDisplay();
+            await updateCartCount();
+        }
     }
 
     window.addToCart = async function (product, quantity = 1) {
+        console.log('Adding to cart:', product);
         try {
             const response = await fetch('/Cart/AddItem', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     productId: product.id,
                     quantity: quantity
                 })
             });
 
+            console.log('AddItem response:', response);
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
 
             const data = await response.json();
+            console.log('AddItem response data:', data);
 
             if (data.success) {
-                const existingItem = cart.find(item => item.id === product.id);
-                if (existingItem) {
-                    existingItem.quantity += quantity;
-                } else {
-                    cart.push({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        image: product.imageUrl,
-                        quantity: quantity
-                    });
-                }
-
-                updateCart();
+                await loadCartFromServer();
+                updateCartDisplay();
+                updateCartCount();
                 openCart();
+
+                showNotification(`${product.name} added to cart!`);
                 return true;
             } else {
-                alert(data.message || "Failed to add to cart");
+                console.error('Failed to add to cart:', data.message);
+                showNotification(data.message || "Failed to add to cart", 'error');
                 return false;
             }
         } catch (error) {
             console.error('Error:', error);
-            alert("Error adding to cart. Please try again.");
+            showNotification("Error adding to cart. Please try again.", 'error');
             return false;
         }
     };
 
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `cart-notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
     checkoutButton.addEventListener('click', function () {
         fetch('/Cart/Checkout', {
-            method: 'POST'
+            method: 'POST',
+            credentials: 'include'
         }).then(response => {
             if (response.ok) {
-                cart = [];
-                updateCart();
                 window.location.href = '/Cart/Index';
             }
         });
@@ -212,6 +281,4 @@
     closeCartButton.addEventListener('click', closeCart);
     overlay.addEventListener('click', closeCart);
     continueShoppingButton.addEventListener('click', closeCart);
-
-    initCart();
 });
