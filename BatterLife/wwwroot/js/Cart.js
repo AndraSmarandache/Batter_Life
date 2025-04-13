@@ -17,32 +17,22 @@
     initCart();
 
     async function initCart() {
-        console.log('Initializing cart...');
         await loadCartFromServer();
         updateCartDisplay();
-        updateCartCount();
+        await updateCartCount();
     }
 
     async function loadCartFromServer() {
-        console.log('Loading cart from server...');
         try {
             const response = await fetch('/Cart/GetCartItems', {
-                credentials: 'include' 
+                credentials: 'include'
             });
-
-            console.log('Cart response status:', response.status);
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Cart data received:', data);
-
                 cart = Array.isArray(data.items) ? data.items : [];
-                console.log('Cart after processing:', cart);
-            } else {
-                console.error('Failed to load cart:', response.status);
             }
         } catch (error) {
-            console.error('Error loading cart:', error);
             cart = [];
         }
     }
@@ -71,7 +61,6 @@
     }
 
     function updateCartDisplay() {
-        console.log('Updating cart display with:', cart);
         cartItemsContainer.innerHTML = '';
 
         if (!cart || cart.length === 0) {
@@ -128,7 +117,9 @@
                 const count = Array.isArray(data.items)
                     ? data.items.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0)
                     : 0;
-                cartCount.textContent = count;
+                document.querySelectorAll('.cart-count').forEach(el => {
+                    el.textContent = count;
+                });
             }
         } catch (error) {
             console.error('Error updating cart count:', error);
@@ -208,7 +199,6 @@
     }
 
     window.addToCart = async function (product, quantity = 1) {
-        console.log('Adding to cart:', product);
         try {
             const response = await fetch('/Cart/AddItem', {
                 method: 'POST',
@@ -222,14 +212,11 @@
                 })
             });
 
-            console.log('AddItem response:', response);
-
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
 
             const data = await response.json();
-            console.log('AddItem response data:', data);
 
             if (data.success) {
                 await loadCartFromServer();
@@ -240,12 +227,10 @@
                 showNotification(`${product.name} added to cart!`);
                 return true;
             } else {
-                console.error('Failed to add to cart:', data.message);
                 showNotification(data.message || "Failed to add to cart", 'error');
                 return false;
             }
         } catch (error) {
-            console.error('Error:', error);
             showNotification("Error adding to cart. Please try again.", 'error');
             return false;
         }
