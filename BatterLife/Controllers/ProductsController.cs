@@ -13,9 +13,11 @@ namespace BatterLife.Controllers
             _productService = productService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? category, string? sortBy)
         {
-            var products = await _productService.GetAllProductsAsync();
+            var products = await _productService.GetAllProductsAsync(category, sortBy);
+            ViewBag.SelectedCategory = category ?? "all";
+            ViewBag.SortBy = sortBy ?? "name-asc";
             return View(products);
         }
     }

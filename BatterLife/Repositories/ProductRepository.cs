@@ -1,7 +1,7 @@
 ﻿using BatterLife.Models;
 using BatterLife.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BatterLife.Repositories
@@ -23,12 +23,11 @@ namespace BatterLife.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable<Product>> GetAllWithDetailsAsync()
+        public IQueryable<Product> GetAllWithDetailsAsync()
         {
-            return await Context.Products
+            return Context.Products
                 .Include(p => p.Category)
-                .Include(p => p.Reviews)
-                .ToListAsync();
+                .Include(p => p.Reviews);
         }
     }
 }

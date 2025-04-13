@@ -1,6 +1,10 @@
 ﻿using BatterLife.Models;
 using BatterLife.Repositories.Interfaces;
 using BatterLife.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BatterLife.Services
 {
@@ -13,9 +17,25 @@ namespace BatterLife.Services
             _repository = repository;
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task<IEnumerable<Product>> GetAllProductsAsync(string? category = null, string? sortBy = null)
         {
-            var products = await _repository.ProductRepository.GetAllWithDetailsAsync();
+            var query = _repository.ProductRepository.GetAllWithDetailsAsync();
+
+            if (!string.IsNullOrEmpty(category) && category != "all")
+            {
+                query = query.Where(p => p.Category.Name.ToLower() == category.ToLower());
+            }
+
+            query = sortBy switch
+            {
+                "name-asc" => query.OrderBy(p => p.Name),
+                "name-desc" => query.OrderByDescending(p => p.Name),
+                "price-asc" => query.OrderBy(p => p.Price),
+                "price-desc" => query.OrderByDescending(p => p.Price),
+                _ => query.OrderBy(p => p.Name),
+            };
+
+            var products = await query.ToListAsync();
 
             foreach (var product in products)
             {
