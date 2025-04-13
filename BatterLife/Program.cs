@@ -22,12 +22,10 @@ builder.Services.AddSession(options =>
     options.Cookie.Name = "BatterLife.Session";
 });
 
-// Add repository and service dependencies
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
-builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
-
-var app = builder.Build();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductDetailsService, ProductDetailsService>(); var app = builder.Build();
 
 // Initialize the database
 using (var scope = app.Services.CreateScope())

@@ -1,29 +1,26 @@
-﻿using BatterLife.Models;
+﻿using BatterLife.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace BatterLife.Controllers
 {
     public class ProductDetailsController : Controller
     {
-        private readonly BatterLifeDbContext _context;
+        private readonly IProductDetailsService _productDetailsService;
+        private readonly ICartService _cartService;
 
-        public ProductDetailsController(BatterLifeDbContext context)
+        public ProductDetailsController(
+            IProductDetailsService productDetailsService,
+            ICartService cartService)
         {
-            _context = context;
+            _productDetailsService = productDetailsService;
+            _cartService = cartService;
         }
 
         public async Task<IActionResult> Index(int id)
         {
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Reviews)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+            var product = await _productDetailsService.GetProductWithDetailsAsync(id);
             if (product == null) return NotFound();
-
-            product.Rating = product.Reviews.Any() ? product.Reviews.Average(r => r.Rating) : 0;
-
             return View(product);
         }
 
@@ -31,15 +28,19 @@ namespace BatterLife.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
-            var product = await _context.Products.FindAsync(productId);
+            var product = await _productDetailsService.GetProductWithDetailsAsync(productId);
             if (product == null)
             {
                 return Json(new { success = false, message = "Product not found" });
             }
 
+            var sessionId = HttpContext.Session.Id;
+            var result = await _cartService.AddItemToCartAsync(sessionId, productId, quantity);
+
             return Json(new
             {
-                success = true,
+                success = result.Success,
+                message = result.Message,
                 product = new
                 {
                     id = product.Id,
@@ -48,8 +49,7 @@ namespace BatterLife.Controllers
                     imageUrl = product.ImageUrl,
                     formattedPrice = product.FormattedPrice
                 },
-                quantity = quantity,
-                message = $"{quantity} {product.Name}(s) added to cart"
+                quantity = quantity
             });
         }
     }

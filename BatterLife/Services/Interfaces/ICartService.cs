@@ -10,6 +10,7 @@ namespace BatterLife.Services.Interfaces
         Task UpdateCartItemAsync(string sessionId, int productId, int quantity);
         Task RemoveFromCartAsync(string sessionId, int productId);
         Task<int> GetCartCountAsync(string sessionId);
+        Task<CartOperationResult> CheckoutAsync(string sessionId);
     }
 
     public class CartOperationResult

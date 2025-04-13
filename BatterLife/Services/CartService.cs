@@ -115,5 +115,42 @@ namespace BatterLife.Services
             var cart = await GetCartWithItemsAsync(sessionId);
             return cart.CartItems.Sum(ci => ci.Quantity);
         }
+
+        public async Task<CartOperationResult> CheckoutAsync(string sessionId)
+        {
+            using var transaction = await _repository.BeginTransactionAsync();
+
+            try
+            {
+                var cart = await GetCartWithItemsAsync(sessionId);
+                if (!cart.CartItems.Any())
+                {
+                    return new CartOperationResult
+                    {
+                        Success = false,
+                        Message = "Cart is empty"
+                    };
+                }
+
+                cart.CartItems.Clear();
+                await _repository.SaveAsync();
+                await transaction.CommitAsync();
+
+                return new CartOperationResult
+                {
+                    Success = true,
+                    Message = "Checkout successful"
+                };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new CartOperationResult
+                {
+                    Success = false,
+                    Message = $"Checkout failed: {ex.Message}"
+                };
+            }
+        }
     }
 }

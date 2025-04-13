@@ -75,7 +75,14 @@ namespace BatterLife.Controllers
         public async Task<IActionResult> Checkout()
         {
             var sessionId = HttpContext.Session.Id;
-            return Json(new { success = true });
+            var result = await _cartService.CheckoutAsync(sessionId);
+
+            if (result.Success)
+            {
+                return RedirectToAction("Index", "OrderConfirmation");
+            }
+
+            return Json(new { success = false, message = result.Message });
         }
     }
 
