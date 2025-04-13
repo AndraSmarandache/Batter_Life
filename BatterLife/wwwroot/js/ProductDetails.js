@@ -3,12 +3,10 @@
     const quantityInput = document.getElementById('quantity');
     const priceElement = document.querySelector('.price');
     const addToCartButton = document.querySelector('.add-to-cart-button');
+    const backButton = document.querySelector('.back-button');
     const productDetailsContent = document.querySelector('.product-details-content');
 
-    if (!productDetailsContent) {
-        console.error('Product details content not found');
-        return;
-    }
+    if (!productDetailsContent) return;
 
     let productId = productDetailsContent.dataset.productId;
     if (!productId) {
@@ -16,21 +14,14 @@
         if (match) productId = match[1];
     }
 
-    if (!productId) {
-        console.error('Product ID not found');
-        return;
-    }
+    if (!productId) return;
 
     const productName = document.querySelector('.product-name')?.textContent;
     const productImage = document.querySelector('.product-details-image')?.src;
-
     const originalPriceText = document.querySelector('.price')?.textContent;
     const originalPrice = originalPriceText ? parseFloat(originalPriceText.replace(/[^0-9.]/g, '')) : 0;
 
-    if (isNaN(originalPrice)) {
-        console.error('Could not parse product price');
-        return;
-    }
+    if (isNaN(originalPrice)) return;
 
     function updateTotalPrice() {
         const totalPrice = originalPrice * quantity;
@@ -71,10 +62,7 @@
         addToCartButton.addEventListener('click', async function (e) {
             e.preventDefault();
 
-            if (!productName || !productId) {
-                console.error('Missing product information');
-                return;
-            }
+            if (!productName || !productId) return;
 
             const productData = {
                 id: parseInt(productId),
@@ -86,6 +74,11 @@
             try {
                 const added = await addToCart(productData, quantity);
                 if (added) {
+                    document.dispatchEvent(new Event('cartUpdated', {
+                        bubbles: true,
+                        cancelable: true
+                    }));
+
                     const notification = document.createElement('div');
                     notification.className = 'cart-notification';
                     notification.textContent = `${quantity} ${productName} added to cart!`;
@@ -96,7 +89,6 @@
                     }, 2000);
                 }
             } catch (error) {
-                console.error('Error adding to cart:', error);
                 const notification = document.createElement('div');
                 notification.className = 'cart-notification error';
                 notification.textContent = 'Error adding to cart. Please try again.';
@@ -108,6 +100,23 @@
             }
         });
     }
+
+    if (backButton) {
+        backButton.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            localStorage.setItem('forceCartUpdate', 'true');
+
+            window.location.href = '/Products/Index';
+        });
+    }
+
+    window.addEventListener('pageshow', function (event) {
+        if (localStorage.getItem('forceCartUpdate') === 'true') {
+            localStorage.removeItem('forceCartUpdate');
+            document.dispatchEvent(new Event('cartUpdated'));
+        }
+    });
 
     const seeReviewsButton = document.querySelector('.see-reviews-button');
     const reviewsContainer = document.querySelector('.reviews');
