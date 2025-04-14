@@ -1,55 +1,75 @@
-﻿using BatterLife.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
+using BatterLife.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace BatterLife.Controllers
 {
     public class ProductDetailsController : Controller
     {
-        private readonly IProductDetailsService _productDetailsService;
-        private readonly ICartService _cartService;
+        private readonly BatterLifeDbContext _context;
 
-        public ProductDetailsController(
-            IProductDetailsService productDetailsService,
-            ICartService cartService)
+        public ProductDetailsController(BatterLifeDbContext context)
         {
-            _productDetailsService = productDetailsService;
-            _cartService = cartService;
+            _context = context;
         }
 
-        public async Task<IActionResult> Index(int id)
+        public IActionResult Index(int id)
         {
-            var product = await _productDetailsService.GetProductWithDetailsAsync(id);
-            if (product == null) return NotFound();
+            var product = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Reviews)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            product.Rating = product.Reviews.Any() ?
+                product.Reviews.Average(r => r.Rating) : 0;
+
             return View(product);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddToCart(int productId, int quantity)
+        public IActionResult AddToCart(int productId, int quantity)
         {
-            var product = await _productDetailsService.GetProductWithDetailsAsync(productId);
+            var product = _context.Products.Find(productId);
+
             if (product == null)
             {
                 return Json(new { success = false, message = "Product not found" });
             }
 
-            var sessionId = HttpContext.Session.Id;
-            var result = await _cartService.AddItemToCartAsync(sessionId, productId, quantity);
+            return Json(new
+            {
+                success = true,
+                message = $"Added {quantity} {product.Name}(s) to cart",
+                totalPrice = product.Price * quantity
+            });
+        }
+
+        [HttpGet]
+        public IActionResult GetReviews(int productId)
+        {
+            var product = _context.Products
+                .Include(p => p.Reviews)
+                .FirstOrDefault(p => p.Id == productId);
+
+            if (product == null)
+            {
+                return Json(new { success = false, message = "Product not found" });
+            }
 
             return Json(new
             {
-                success = result.Success,
-                message = result.Message,
-                product = new
-                {
-                    id = product.Id,
-                    name = product.Name,
-                    price = product.Price,
-                    imageUrl = product.ImageUrl,
-                    formattedPrice = product.FormattedPrice
-                },
-                quantity = quantity
+                success = true,
+                reviews = product.Reviews.Select(r => new {
+                    UserName = r.UserName,
+                    Comment = r.Comment,
+                    Rating = r.Rating
+                })
             });
         }
     }

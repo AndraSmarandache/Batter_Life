@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BatterLife.Models.BatterLife.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BatterLife.Models
 {
@@ -16,7 +17,6 @@ namespace BatterLife.Models
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
-        public DbSet<ContactModel> ContactMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,8 +29,6 @@ namespace BatterLife.Models
                 .HasOne(r => r.Product)
                 .WithMany(p => p.Reviews)
                 .HasForeignKey(r => r.ProductId);
-
-
         }
     }
 }

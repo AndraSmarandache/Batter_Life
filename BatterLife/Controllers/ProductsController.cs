@@ -1,23 +1,32 @@
-﻿using BatterLife.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
+using BatterLife.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace BatterLife.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly IProductService _productService;
+        private readonly BatterLifeDbContext _context;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(BatterLifeDbContext context)
         {
-            _productService = productService;
+            _context = context;
         }
 
-        public async Task<IActionResult> Index(string? category, string? sortBy)
+        public IActionResult Index()
         {
-            var products = await _productService.GetAllProductsAsync(category, sortBy);
-            ViewBag.SelectedCategory = category ?? "all";
-            ViewBag.SortBy = sortBy ?? "name-asc";
+            var products = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Reviews)
+                .ToList();
+
+            foreach (var product in products)
+            {
+                product.Rating = product.Reviews.Any() ?
+                    product.Reviews.Average(r => r.Rating) : 0;
+            }
+
             return View(products);
         }
     }

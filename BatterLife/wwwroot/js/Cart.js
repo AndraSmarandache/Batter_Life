@@ -3,7 +3,7 @@
     const cartSidebar = document.getElementById('cart-sidebar');
     const openCartButton = document.getElementById('open-cart');
     const closeCartButton = document.getElementById('close-cart');
-    const cartItemsContainer = document.getElementById('sidebar-cart-items');
+    const cartItemsContainer = document.querySelector('.cart-items');
     const cartCount = document.querySelector('.cart-count');
     const subtotalElement = document.getElementById('subtotal');
     const shippingElement = document.getElementById('shipping');
@@ -11,30 +11,31 @@
     const checkoutButton = document.querySelector('.checkout-button');
     const continueShoppingButton = document.getElementById('continue-shopping');
 
-    let cart = [];
+    const sampleProducts = [
+        {
+            id: 'prod1',
+            name: 'Chocolate Cake',
+            price: 24.99,
+            image: '/images/chocolate-cake.jpg',
+            quantity: 1
+        },
+        {
+            id: 'prod2',
+            name: 'Tiramisu',
+            price: 18,
+            image: '/images/tiramisu.jpg',
+            quantity: 2
+        }
+    ];
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || sampleProducts;
+    if (cart.length === 0) cart = sampleProducts;
+    localStorage.setItem('cart', JSON.stringify(cart));
     let scrollPosition = 0;
 
-    initCart();
-
-    async function initCart() {
-        await loadCartFromServer();
+    function initCart() {
         updateCartDisplay();
-        await updateCartCount();
-    }
-
-    async function loadCartFromServer() {
-        try {
-            const response = await fetch('/Cart/GetCartItems', {
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                cart = Array.isArray(data.items) ? data.items : [];
-            }
-        } catch (error) {
-            cart = [];
-        }
+        updateCartCount();
     }
 
     function openCart() {
@@ -46,7 +47,6 @@
             overlay.style.opacity = '1';
             cartSidebar.classList.add('active');
         }, 10);
-        updateCartDisplay();
     }
 
     function closeCart() {
@@ -62,8 +62,7 @@
 
     function updateCartDisplay() {
         cartItemsContainer.innerHTML = '';
-
-        if (!cart || cart.length === 0) {
+        if (cart.length === 0) {
             cartItemsContainer.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
             subtotalElement.textContent = '$0.00';
             shippingElement.textContent = '$0.00';
@@ -73,16 +72,15 @@
 
         let subtotal = 0;
         cart.forEach(item => {
-            const itemTotal = parseFloat(item.price) * parseInt(item.quantity);
+            const itemTotal = item.price * item.quantity;
             subtotal += itemTotal;
-
             const cartItemElement = document.createElement('div');
             cartItemElement.className = 'cart-item';
             cartItemElement.innerHTML = `
-                <img src="${item.image || '/images/placeholder.png'}" alt="${item.name || 'Product'}">
+                <img src="${item.image}" alt="${item.name}">
                 <div class="cart-item-details">
-                    <h3>${item.name || 'Unknown Product'}</h3>
-                    <p class="price">$${(parseFloat(item.price) || 0).toFixed(2)}</p>
+                    <h3>${item.name}</h3>
+                    <p class="price">$${(item.price * item.quantity).toFixed(2)}</p>
                     <div class="quantity-selector">
                         <button class="decrease" data-id="${item.id}">-</button>
                         <input type="number" value="${item.quantity}" min="1" data-id="${item.id}">
@@ -98,32 +96,15 @@
 
         const shipping = subtotal > 50 ? 0 : 5;
         const total = subtotal + shipping;
-
         subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-        shippingElement.textContent = `$${shipping.toFixed(2)}`;
+        shippingElement.textContent = subtotal > 50 ? '$0.00' : '$5.00';
         totalElement.textContent = `$${total.toFixed(2)}`;
-
         addCartItemEventListeners();
     }
 
-    async function updateCartCount() {
-        try {
-            const response = await fetch('/Cart/GetCartItems', {
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const count = Array.isArray(data.items)
-                    ? data.items.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0)
-                    : 0;
-                document.querySelectorAll('.cart-count').forEach(el => {
-                    el.textContent = count;
-                });
-            }
-        } catch (error) {
-            console.error('Error updating cart count:', error);
-        }
+    function updateCartCount() {
+        const count = cart.reduce((total, item) => total + item.quantity, 0);
+        cartCount.textContent = count;
     }
 
     function addCartItemEventListeners() {
@@ -141,121 +122,59 @@
         });
     }
 
-    async function decreaseQuantity(e) {
+    function decreaseQuantity(e) {
         const id = e.target.getAttribute('data-id');
-        const response = await fetch(`/Cart/UpdateItem?productId=${id}&quantity=-1`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        if (response.ok) {
-            await loadCartFromServer();
-            updateCartDisplay();
-            await updateCartCount();
+        const item = cart.find(item => item.id === id);
+        if (item.quantity > 1) {
+            item.quantity--;
+            updateCart();
         }
     }
 
-    async function increaseQuantity(e) {
+    function increaseQuantity(e) {
         const id = e.target.getAttribute('data-id');
-        const response = await fetch(`/Cart/UpdateItem?productId=${id}&quantity=1`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        if (response.ok) {
-            await loadCartFromServer();
-            updateCartDisplay();
-            await updateCartCount();
-        }
+        const item = cart.find(item => item.id === id);
+        item.quantity++;
+        updateCart();
     }
 
-    async function updateQuantity(e) {
+    function updateQuantity(e) {
         const id = e.target.getAttribute('data-id');
+        const item = cart.find(item => item.id === id);
         const newQuantity = parseInt(e.target.value);
         if (newQuantity > 0) {
-            const response = await fetch(`/Cart/UpdateItem?productId=${id}&quantity=${newQuantity}`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-            if (response.ok) {
-                await loadCartFromServer();
-                updateCartDisplay();
-                await updateCartCount();
-            }
+            item.quantity = newQuantity;
+            updateCart();
         } else {
-            e.target.value = 1;
+            e.target.value = item.quantity;
         }
     }
 
-    async function removeItem(e) {
+    function removeItem(e) {
         const id = e.target.closest('button').getAttribute('data-id');
-        const response = await fetch(`/Cart/RemoveItem?productId=${id}`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        if (response.ok) {
-            await loadCartFromServer();
-            updateCartDisplay();
-            await updateCartCount();
-        }
+        cart = cart.filter(item => item.id !== id);
+        updateCart();
     }
 
-    window.addToCart = async function (product, quantity = 1) {
-        try {
-            const response = await fetch('/Cart/AddItem', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    productId: product.id,
-                    quantity: quantity
-                })
-            });
+    function updateCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+        updateCartCount();
+    }
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                await loadCartFromServer();
-                updateCartDisplay();
-                updateCartCount();
-                openCart();
-
-                showNotification(`${product.name} added to cart!`);
-                return true;
-            } else {
-                showNotification(data.message || "Failed to add to cart", 'error');
-                return false;
-            }
-        } catch (error) {
-            showNotification("Error adding to cart. Please try again.", 'error');
-            return false;
+    window.addToCart = function (product) {
+        const existingItem = cart.find(item => item.id === product.id);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ ...product, quantity: 1 });
         }
+        updateCart();
+        alert(`${product.name} added to cart!`);
     };
 
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.className = `cart-notification ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-
     checkoutButton.addEventListener('click', function () {
-        fetch('/Cart/Checkout', {
-            method: 'POST',
-            credentials: 'include'
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = '/Cart/Index';
-            }
-        });
+        alert('Proceeding to checkout');
     });
 
     openCartButton.addEventListener('click', function (e) {
@@ -266,4 +185,6 @@
     closeCartButton.addEventListener('click', closeCart);
     overlay.addEventListener('click', closeCart);
     continueShoppingButton.addEventListener('click', closeCart);
+
+    initCart();
 });

@@ -19,7 +19,7 @@ namespace BatterLife.Controllers
         public async Task<IActionResult> Index()
         {
             var reviews = await _context.Reviews
-                .Include(r => r.Product)
+                .Include(r => r.Product) // Include product information
                 .ToListAsync();
             return View(reviews);
         }
@@ -46,6 +46,7 @@ namespace BatterLife.Controllers
         // GET: Reviews/Create
         public IActionResult Create()
         {
+            // Load products for dropdown
             ViewBag.Products = new SelectList(_context.Products, "Id", "Name");
             return View();
         }
@@ -62,6 +63,7 @@ namespace BatterLife.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            // Reload products if validation fails
             ViewBag.Products = new SelectList(_context.Products, "Id", "Name", review.ProductId);
             return View(review);
         }
@@ -80,6 +82,7 @@ namespace BatterLife.Controllers
                 return NotFound();
             }
 
+            // Load products with selected product
             ViewBag.Products = new SelectList(_context.Products, "Id", "Name", review.ProductId);
             return View(review);
         }

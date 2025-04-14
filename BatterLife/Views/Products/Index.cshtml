@@ -2,8 +2,6 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Products - BatterLife";
-    var selectedCategory = ViewBag.SelectedCategory as string;
-    var sortBy = ViewBag.SortBy as string;
 }
 
 @section Styles {
@@ -14,41 +12,23 @@
     <h1>Our Products</h1>
     <div class="filters-container">
         <div class="category-filters">
-            <a href="/Products/Index?category=all&sortBy=@ViewBag.SortBy" class="@(selectedCategory == "all" ? "active" : "")">All</a>
-            <a href="/Products/Index?category=cakes&sortBy=@ViewBag.SortBy" class="@(selectedCategory == "cakes" ? "active" : "")">Cakes</a>
-            <a href="/Products/Index?category=pastries&sortBy=@ViewBag.SortBy" class="@(selectedCategory == "pastries" ? "active" : "")">Pastries</a>
-            <a href="/Products/Index?category=cookies&sortBy=@ViewBag.SortBy" class="@(selectedCategory == "cookies" ? "active" : "")">Cookies</a>
-            <a href="/Products/Index?category=desserts&sortBy=@ViewBag.SortBy" class="@(selectedCategory == "desserts" ? "active" : "")">Desserts</a>
+            <button class="active" data-category="all">All</button>
+            <button data-category="cakes">Cakes</button>
+            <button data-category="pastries">Pastries</button>
+            <button data-category="cookies">Cookies</button>
+            <button data-category="desserts">Desserts</button>
         </div>
         <div class="sort-filters">
             <label>Sort by:</label>
             <div class="custom-dropdown">
                 <button class="dropdown-button">
-                    @switch (sortBy)
-                    {
-                        case "name-asc":
-                            <span>Name: A-Z</span>
-                            ; break;
-                        case "name-desc":
-                            <span>Name: Z-A</span>
-                            ; break;
-                        case "price-asc":
-                            <span>Price: Low to High</span>
-                            ; break;
-                        case "price-desc":
-                            <span>Price: High to Low</span>
-                            ; break;
-                        default:
-                            <span>Name: A-Z</span>
-                            ; break;
-                    }
-                    <span>▼</span>
+                    Name: A-Z <span>▼</span>
                 </button>
                 <div class="dropdown-content">
-                    <a href="/Products/Index?category=@selectedCategory&sortBy=name-asc" data-sort="name-asc">Name: A-Z</a>
-                    <a href="/Products/Index?category=@selectedCategory&sortBy=name-desc" data-sort="name-desc">Name: Z-A</a>
-                    <a href="/Products/Index?category=@selectedCategory&sortBy=price-asc" data-sort="price-asc">Price: Low to High</a>
-                    <a href="/Products/Index?category=@selectedCategory&sortBy=price-desc" data-sort="price-desc">Price: High to Low</a>
+                    <button data-sort="name-asc">Name: A-Z</button>
+                    <button data-sort="name-desc">Name: Z-A</button>
+                    <button data-sort="price-asc">Price: Low to High</button>
+                    <button data-sort="price-desc">Price: High to Low</button>
                 </div>
             </div>
         </div>
@@ -56,11 +36,8 @@
     <div class="product-list">
         @foreach (var product in Model)
         {
-            <div class="product-card"
-                 data-product-id="@product.Id"
-                 data-category="@product.Category.Name.ToLower()"
-                 data-name="@product.Name"
-                 data-price="@product.Price.ToString("0.00")">
+            <div class="product-card" data-product-id="@product.Id" data-category="@product.Category"
+                 data-name="@product.Name" data-price="@product.Price">
                 <div class="product-image">
                     <img src="@product.ImageUrl" alt="@product.Name">
                     <div class="overlay">
@@ -68,7 +45,7 @@
                     </div>
                 </div>
                 <h3>@product.Name</h3>
-                <p>$@product.Price.ToString("0.00")</p>
+                <p>$@product.Price</p>
             </div>
         }
     </div>
@@ -81,91 +58,5 @@
 }
 
 @section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const dropdownButton = document.querySelector('.dropdown-button');
-            const dropdownContent = document.querySelector('.dropdown-content');
-            const addToCartButtons = document.querySelectorAll('.add-to-cart');
-            const productCards = document.querySelectorAll('.product-card');
-
-            if (dropdownButton && dropdownContent) {
-                dropdownButton.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    dropdownContent.classList.toggle('show');
-                });
-
-                window.addEventListener('click', function () {
-                    if (dropdownContent.classList.contains('show')) {
-                        dropdownContent.classList.remove('show');
-                    }
-                });
-            }
-
-            if (addToCartButtons) {
-                addToCartButtons.forEach(button => {
-                    button.addEventListener('click', handleAddToCart);
-                });
-            }
-
-            if (productCards) {
-                productCards.forEach(card => {
-                    card.addEventListener('click', function (e) {
-                        if (!e.target.closest('.add-to-cart')) {
-                            const productId = this.dataset.productId;
-                            window.location.href = `/ProductDetails/Index/${productId}`;
-                        }
-                    });
-                });
-            }
-
-            async function handleAddToCart(e) {
-                console.log('Add to cart button clicked');
-                e.preventDefault();
-                e.stopPropagation();
-
-                const button = e.target.closest('.add-to-cart');
-                if (!button) {
-                    console.error('Could not find add-to-cart button');
-                    return;
-                }
-
-                const productCard = button.closest('.product-card');
-                if (!productCard) {
-                    console.error('Could not find product card');
-                    return;
-                }
-
-                const productId = productCard.dataset.productId;
-                const productName = productCard.querySelector('h3').textContent;
-                const productPrice = parseFloat(productCard.dataset.price);
-                const productImage = productCard.querySelector('img').src;
-
-                console.log('Adding product to cart:', { productId, productName, productPrice, productImage });
-
-                const productData = {
-                    id: parseInt(productId),
-                    name: productName,
-                    price: productPrice,
-                    imageUrl: productImage
-                };
-
-                try {
-                    const added = await addToCart(productData, 1);
-                    console.log('Add to cart result:', added);
-                    if (added) {
-                        const notification = document.createElement('div');
-                        notification.className = 'cart-notification';
-                        notification.textContent = `${productName} added to cart!`;
-                        document.body.appendChild(notification);
-
-                        setTimeout(() => {
-                            notification.remove();
-                        }, 2000);
-                    }
-                } catch (error) {
-                    console.error('Error adding to cart:', error);
-                }
-            }
-        });
-    </script>
+    <script src="~/js/products.js" asp-append-version="true"></script>
 }
