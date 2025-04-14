@@ -1,5 +1,4 @@
-﻿// ProductCategory.cs
-namespace BatterLife.Models
+﻿namespace BatterLife.Models
 {
     public class ProductCategory
     {

@@ -24,7 +24,7 @@
             <a asp-controller="Products" asp-action="Index">Products</a>
             <a asp-controller="Contact" asp-action="Index">Contact</a>
             <a asp-controller="Faq" asp-action="Index">FAQ</a>
-            <a href="#" id="open-cart">Cart</a>
+            <a href="#" id="open-cart">Cart <span class="cart-count">0</span></a>
             <a href="#" id="user-icon" style="display: none;"><i class="fas fa-user-circle"></i></a>
             <a asp-controller="Account" asp-action="Login" id="login-link">Login</a>
         </nav>
@@ -36,13 +36,16 @@
         </div>
     </div>
 
-    <div class="cart-overlay" id="overlay"></div>
     <div class="cart-sidebar" id="cart-sidebar">
         <button class="close-cart-button" id="close-cart">
             <i class="fas fa-times"></i>
         </button>
         <h1>Your Cart</h1>
-        <div class="cart-items"></div>
+        <div class="cart-items-wrapper">
+            <div class="cart-items" id="sidebar-cart-items">
+                <div class="empty-cart">Your cart is empty</div>
+            </div>
+        </div>
         <div class="cart-summary">
             <h2>Order Summary</h2>
             <div class="summary-row">
@@ -51,16 +54,17 @@
             </div>
             <div class="summary-row">
                 <span>Shipping:</span>
-                <span id="shipping">$0.00</span>
+                <span id="shipping">$5.00</span>
             </div>
             <div class="summary-row total">
                 <span>Total:</span>
-                <span id="total">$0.00</span>
+                <span id="total">$5.00</span>
             </div>
             <button class="checkout-button">Proceed to Checkout</button>
             <button class="continue-shopping-button" id="continue-shopping">Continue Shopping</button>
         </div>
     </div>
+
     @if (IsSectionDefined("Footer"))
     {
         @RenderSection("Footer", required: false)

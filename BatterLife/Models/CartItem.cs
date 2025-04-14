@@ -1,6 +1,4 @@
-﻿using BatterLife.Models.BatterLife.Models;
-
-namespace BatterLife.Models
+﻿namespace BatterLife.Models
 {
     public class CartItem
     {

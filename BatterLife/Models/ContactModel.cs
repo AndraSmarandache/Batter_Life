@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace BatterLife.Models
 {
     public class ContactModel
     {
+        public int Id { get; set; }
+
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; }
 
@@ -16,5 +19,7 @@ namespace BatterLife.Models
 
         [Required(ErrorMessage = "Message is required")]
         public string Message { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
