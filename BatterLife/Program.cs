@@ -1,19 +1,16 @@
-using BatterLife.Models;
-using BatterLife.Repositories.Interfaces;
+﻿using BatterLife.Models;
 using BatterLife.Repositories;
-using BatterLife.Services.Interfaces;
+using BatterLife.Repositories.Interfaces;
 using BatterLife.Services;
+using BatterLife.Services.Interfaces;
 using BatterLife.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<BatterLifeDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BatterLifeDb")));
-
-// Add session support
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -21,13 +18,15 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.Name = "BatterLife.Session";
 });
-
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IProductDetailsService, ProductDetailsService>(); var app = builder.Build();
+builder.Services.AddScoped<IProductDetailsService, ProductDetailsService>();
+builder.Services.AddScoped<IContactRepository, ContactRepository>();
+builder.Services.AddScoped<IContactService, ContactService>();    
 
-// Initialize the database
+var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -43,7 +42,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -55,9 +53,6 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
-
-
-
 app.MapStaticAssets();
 app.MapControllerRoute(
     name: "default",

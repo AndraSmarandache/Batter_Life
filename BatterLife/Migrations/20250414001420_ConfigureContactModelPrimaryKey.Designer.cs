@@ -4,6 +4,7 @@ using BatterLife.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BatterLife.Migrations
 {
     [DbContext(typeof(BatterLifeDbContext))]
-    partial class BatterLifeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250414001420_ConfigureContactModelPrimaryKey")]
+    partial class ConfigureContactModelPrimaryKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
